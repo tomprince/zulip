@@ -33,6 +33,7 @@ VENV_DEPENDENCIES = [
     "libxslt1-dev",         # Used for installing talon
     "libpq-dev",            # Needed by psycopg2
     "libssl-dev",           # Needed to build pycurl and other libraries
+    "libxmlsec1-dev",       # Needed by xmlsec
     "libmagic1",            # Used for install python-magic
 
     # This is technically a node dependency, but we add it here
