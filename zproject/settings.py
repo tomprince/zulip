@@ -160,7 +160,14 @@ DEFAULT_SETTINGS = {
     'SOCIAL_AUTH_SUBDOMAIN': None,
     'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET': get_secret('azure_oauth2_secret'),
     'SOCIAL_AUTH_GOOGLE_KEY': get_secret('social_auth_google_key', development_only=True),
-    # Historical name for SOCIAL_AUTH_GITHUB_KEY; still allowed in production.
+    'SOCIAL_AUTH_SAML_SP_ENTITY_ID': None,
+    'SOCIAL_AUTH_SAML_ORG_INFO': None,
+    'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT': None,
+    'SOCIAL_AUTH_SAML_SUPPORT_CONTACT': None,
+    'SOCIAL_AUTH_SAML_ENABLED_IDPS': None,
+    'SOCIAL_AUTH_SAML_SP_EXTRA': {},
+    'SOCIAL_AUTH_SAML_SECURITY_CONFIG': {},
+        # Historical name for SOCIAL_AUTH_GITHUB_KEY; still allowed in production.
     'GOOGLE_OAUTH2_CLIENT_ID': None,
 
     # Other auth
@@ -1315,6 +1322,7 @@ SOCIAL_AUTH_GITHUB_ORG_KEY = SOCIAL_AUTH_GITHUB_KEY
 SOCIAL_AUTH_GITHUB_ORG_SECRET = SOCIAL_AUTH_GITHUB_SECRET
 SOCIAL_AUTH_GITHUB_TEAM_KEY = SOCIAL_AUTH_GITHUB_KEY
 SOCIAL_AUTH_GITHUB_TEAM_SECRET = SOCIAL_AUTH_GITHUB_SECRET
+SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = get_secret('social_auth_saml_sp_private_key')
 
 SOCIAL_AUTH_GOOGLE_SECRET = get_secret('social_auth_google_secret')
 # Fallback to google-oauth settings in case social auth settings for
