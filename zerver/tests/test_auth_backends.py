@@ -1584,6 +1584,7 @@ class FetchAuthBackends(ZulipTestCase):
             self.assert_json_success(result)
             checker = check_dict_only([
                 ('authentication_methods', check_dict_only(authentication_methods_list)),
+                    ('saml', check_bool),
                 ('email_auth_enabled', check_bool),
                 ('is_incompatible', check_bool),
                 ('require_email_format_usernames', check_bool),
@@ -1657,6 +1658,7 @@ class FetchAuthBackends(ZulipTestCase):
                 self.assert_json_success(result)
                 data = result.json()
                 self.assertEqual(data, get_expected_result({"google", "dev"}))
+                    'saml': False,
 
                 # Verify invalid subdomain
                 result = self.client_get("/api/v1/get_auth_backends",
@@ -1673,6 +1675,7 @@ class FetchAuthBackends(ZulipTestCase):
                 data = result.json()
                 self.assertEqual(data, get_expected_result({"dev"}))
 
+                    'saml': False,
             with self.settings(ROOT_DOMAIN_LANDING_PAGE=True):
                 # With ROOT_DOMAIN_LANDING_PAGE, homepage fails
                 result = self.client_get("/api/v1/get_auth_backends",
@@ -1685,6 +1688,7 @@ class FetchAuthBackends(ZulipTestCase):
                 self.assert_json_success(result)
                 data = result.json()
                 self.assertEqual(data, get_expected_result({"dev"}))
+                    'saml': False,
 
 class TestTwoFactor(ZulipTestCase):
     def test_direct_dev_login_with_2fa(self) -> None:
