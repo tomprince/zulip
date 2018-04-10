@@ -8,6 +8,8 @@ from django.urls import reverse
 from zerver.models import UserProfile, get_realm, Realm
 from zproject.backends import (
     any_oauth_backend_enabled,
+    saml_auth_enabled,
+    saml_get_idps,
     password_auth_enabled,
     require_email_format_usernames,
     auth_enabled_helper,
@@ -122,6 +124,8 @@ def zulip_default_context(request: HttpRequest) -> Dict[str, Any]:
         'root_domain_uri': settings.ROOT_DOMAIN_URI,
         'apps_page_url': apps_page_url,
         'open_realm_creation': settings.OPEN_REALM_CREATION,
+        'saml_auth_enabled': saml_auth_enabled(realm),
+        'saml_get_idps': saml_get_idps(realm),
         'development_environment': settings.DEVELOPMENT,
         'support_email': FromAddress.SUPPORT,
         'find_team_link_disabled': find_team_link_disabled,
