@@ -366,9 +366,9 @@ def start_social_login(request: HttpRequest, backend: str, idp: str=None) -> Htt
         return redirect_to_config_error("saml")
     return oauth_redirect_to_root(request, backend_url, 'social', idp=idp)
 
-def start_social_signup(request: HttpRequest, backend: str) -> HttpResponse:
+def start_social_signup(request: HttpRequest, backend: str, idp: str=None) -> HttpResponse:
     backend_url = reverse('social:begin', args=[backend])
-    return oauth_redirect_to_root(request, backend_url, 'social', is_signup=True)
+    return oauth_redirect_to_root(request, backend_url, 'social', is_signup=True, idp=idp)
 
 def authenticate_remote_user(realm: Realm,
                              email_address: Optional[str]) -> Optional[UserProfile]:
