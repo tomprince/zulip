@@ -473,6 +473,9 @@ i18n_urls = [
 
     # Registration views, require a confirmation ID.
     url(r'^accounts/home/$', zerver.views.registration.accounts_home,
+    url(r'^accounts/register/social/(?P<backend>\w+)/(?P<idp>\w+)$',
+        zerver.views.auth.start_social_signup,
+        name='signup-saml'),
         name='zerver.views.registration.accounts_home'),
     url(r'^accounts/send_confirm/(?P<email>[\S]+)?$',
         TemplateView.as_view(template_name='zerver/accounts_send_confirm.html'),
@@ -706,6 +709,9 @@ urls += [
     url(r'^notify_tornado$', zerver.tornado.views.notify, name='zerver.tornado.views.notify'),
     url(r'^api/v1/events/internal$', zerver.tornado.views.get_events_internal),
 ]
+
+# SAML metadata
+urls += [url(r'^saml/metadata$', zerver.views.auth.saml_metadata_view, name='saml_metadata_view')]
 
 # Python Social Auth
 urls += [url(r'^', include('social_django.urls', namespace='social'))]

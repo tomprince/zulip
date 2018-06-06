@@ -315,7 +315,8 @@ def remote_user_jwt(request: HttpRequest) -> HttpResponse:
     return login_or_register_remote_user(request, email, user_profile, remote_user)
 
 def oauth_redirect_to_root(request: HttpRequest, url: str,
-                           sso_type: str, is_signup: bool=False) -> HttpResponse:
+                           sso_type: str, is_signup: bool=False,
+                           idp: str=None) -> HttpResponse:
     main_site_uri = settings.ROOT_DOMAIN_URI + url
     if settings.SOCIAL_AUTH_SUBDOMAIN is not None and sso_type == 'social':
         main_site_uri = (settings.EXTERNAL_URI_SCHEME +
@@ -327,6 +328,8 @@ def oauth_redirect_to_root(request: HttpRequest, url: str,
         'subdomain': get_subdomain(request),
         'is_signup': '1' if is_signup else '0',
     }
+    if idp is not None:
+        params.update({'idp': idp})
 
     params['multiuse_object_key'] = request.GET.get('multiuse_object_key', '')
 
@@ -344,7 +347,7 @@ def oauth_redirect_to_root(request: HttpRequest, url: str,
 
     return redirect(main_site_uri + '?' + urllib.parse.urlencode(params))
 
-def start_social_login(request: HttpRequest, backend: str) -> HttpResponse:
+def start_social_login(request: HttpRequest, backend: str, idp: str=None) -> HttpResponse:
     backend_url = reverse('social:begin', args=[backend])
     if (backend == "github") and not (settings.SOCIAL_AUTH_GITHUB_KEY and
                                       settings.SOCIAL_AUTH_GITHUB_SECRET):
@@ -353,8 +356,15 @@ def start_social_login(request: HttpRequest, backend: str) -> HttpResponse:
                                       settings.SOCIAL_AUTH_GOOGLE_SECRET):
         return redirect_to_config_error("google")
     # TODO: Add a similar block of AzureAD.
-
-    return oauth_redirect_to_root(request, backend_url, 'social')
+    if (backend == "saml") and not (settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID and
+                                    settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT and
+                                    settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY and
+                                    settings.SOCIAL_AUTH_SAML_ORG_INFO and
+                                    settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT and
+                                    settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT and
+                                    settings.SOCIAL_AUTH_SAML_ENABLED_IDPS):
+        return redirect_to_config_error("saml")
+    return oauth_redirect_to_root(request, backend_url, 'social', idp=idp)
 
 def start_social_signup(request: HttpRequest, backend: str) -> HttpResponse:
     backend_url = reverse('social:begin', args=[backend])
@@ -771,6 +781,7 @@ def get_auth_backends_data(request: HttpRequest) -> Dict[str, Any]:
             realm = None
     result = {
         "password": password_auth_enabled(realm),
+        "saml": saml_auth_enabled(realm),
     }
     for auth_backend_name in AUTH_BACKEND_NAME_MAP:
         key = auth_backend_name.lower()
@@ -851,3 +862,12 @@ def password_reset(request: HttpRequest, **kwargs: Any) -> HttpResponse:
                                  template_name='zerver/reset.html',
                                  password_reset_form=ZulipPasswordResetForm,
                                  post_reset_redirect='/accounts/password/reset/done/')
+
+def saml_metadata_view(request: HttpRequest) -> HttpResponse:
+    realm = get_realm(get_subdomain(request))
+    if saml_auth_enabled(realm):
+        saml_auth = SAMLAuthBackend()
+        metadata, errors = SAMLAuthBackend.get_saml_metadata(saml_auth)
+        if not errors:
+            return HttpResponse(content=metadata, content_type='text/xml;charset=UTF-8')
+    return redirect_to_config_error("saml")
